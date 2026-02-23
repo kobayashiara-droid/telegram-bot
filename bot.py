@@ -1,6 +1,27 @@
 import os
 import telebot
 import google.generativeai as genai
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# --- Настройка веб-заглушки для платформы Render ---
+class DummyHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+
+def run_dummy_server():
+    # Render автоматически задает переменную окружения PORT
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(('0.0.0.0', port), DummyHandler)
+    print(f"Web server is listening on port {port}")
+    server.serve_forever()
+
+# Запускаем сервер-заглушку в параллельном потоке
+threading.Thread(target=run_dummy_server, daemon=True).start()
+# ---------------------------------------------------
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -42,4 +63,5 @@ def handle_message(message):
     response = model.generate_content(full_prompt)
     bot.reply_to(message, response.text)
 
-bot.polling()
+# Параметр none_stop=True помогает боту не падать при мелких обрывах связи
+bot.polling(none_stop=True)
