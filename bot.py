@@ -69,5 +69,15 @@ def handle_message(message):
     bot.reply_to(message, response.text)
 
 # Параметр none_stop=True помогает боту не падать при мелких обрывах связи
-bot.infinity_polling(skip_pending=True)
+import time
+
+while True:
+    try:
+        # Запускаем бота с защитой от старых сообщений
+        bot.infinity_polling(skip_pending=True)
+    except Exception as e:
+        # Если Телеграм ругается (ошибка 409), просто ждем 5 секунд и пробуем снова
+        print(f"Произошла ошибка: {e}. Перезапуск через 5 секунд...")
+        time.sleep(5)
+
 
