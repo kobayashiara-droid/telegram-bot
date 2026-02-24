@@ -64,4 +64,5 @@ def handle_message(message):
     bot.reply_to(message, response.text)
 
 # Параметр none_stop=True помогает боту не падать при мелких обрывах связи
-bot.polling(none_stop=True)
+bot.polling(none_stop=True, skip_pending=True)
+
